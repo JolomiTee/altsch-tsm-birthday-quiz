@@ -12,36 +12,46 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4000;
 
+// ---------------- MONGODB ----------------
 mongoose
 	.connect(
 		process.env.MONGO_URI || "mongodb://127.0.0.1:27017/birthday-reminder"
 	)
-	.then(() => console.log("MongoDb connected"))
-	.catch((err) => console.error("MongoDb Error:", err));
+	.then(() => console.log("✅ MongoDB connected"))
+	.catch((err) => console.error("❌ MongoDB Error:", err));
 
+// ---------------- EJS ----------------
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// ---------------- USER MODEL ----------------
 interface IUser extends Document {
 	username: string;
 	email: string;
-	dob: string;
+	dob: Date; // store as Date, not string
 }
 
 const UserSchema = new Schema<IUser>({
 	username: { type: String, required: true },
 	email: { type: String, unique: true, required: true },
-	dob: { type: String, required: true },
+	dob: { type: Date, required: true },
 });
 
 const User = mongoose.model<IUser>("User", UserSchema);
 
+// ---------------- ROUTES ----------------
 app.get("/", (req: Request, res: Response) => {
-	res.render("index");
+	res.render("index"); // make sure views/index.ejs exists
 });
 
-app.post("/add", async (req: Request, res: Response) => {
+interface AddUserBody {
+	username: string;
+	email: string;
+	dob: string; // comes in as string from form
+}
+
+app.post("/add", async (req: Request<{}, {}, AddUserBody>, res: Response) => {
 	const { username, email, dob } = req.body;
 
 	if (!username || !email || !dob) {
@@ -49,17 +59,19 @@ app.post("/add", async (req: Request, res: Response) => {
 	}
 
 	try {
-		const user = new User({ username, email, dob });
+		const user = new User({ username, email, dob: new Date(dob) });
 		await user.save();
-		res.send("User created!");
+		res.send("✅ User created!");
 	} catch (err: any) {
 		if (err.code === 11000) {
-			res.send("Email already exists!");
+			res.send("⚠️ Email already exists!");
 		} else {
-			res.send("Error: " + err.message);
+			res.send("❌ Error: " + err.message);
 		}
 	}
 });
+
+// ---------------- EMAIL SENDER ----------------
 async function sendEmail(
 	subject: string,
 	body: string,
@@ -75,16 +87,16 @@ async function sendEmail(
 			html: body,
 		});
 		if (error) {
-			console.error("Resend error:", error);
+			console.error("❌ Resend error:", error);
 		}
-		console.log({ data });
+		console.log("✅ Resend response:", data);
 	} else {
 		// Use Nodemailer + Gmail SMTP in development
 		const transporter = nodemailer.createTransport({
 			service: "gmail",
 			auth: {
 				user: process.env.EMAIL_BOX,
-				pass: process.env.MAILER_PASS,
+				pass: process.env.MAILER_PASS, // must be Gmail App Password
 			},
 		});
 		try {
@@ -94,34 +106,42 @@ async function sendEmail(
 				subject,
 				html: body,
 			});
-			console.log("Nodemailer info:", info);
+			console.log("✅ Nodemailer info:", info.response);
 		} catch (error) {
-			console.error("Nodemailer error:", error);
+			console.error("❌ Nodemailer error:", error);
 		}
 	}
 }
 
+// ---------------- CRON JOB ----------------
+// Runs every day at 7am
 cron.schedule("0 7 * * *", async () => {
-	const today = new Date().toISOString().slice(5, 10); // "MM-DD"
+	try {
+		const today = new Date();
+		const todayMonth = today.getMonth(); // 0-indexed
+		const todayDate = today.getDate();
 
-	const users = await User.find({});
-	const celebrants = users.filter((u) => u.dob.slice(5) === today);
+		const users = await User.find({});
+		const celebrants = users.filter((u) => {
+			const dob = new Date(u.dob);
+			return dob.getMonth() === todayMonth && dob.getDate() === todayDate;
+		});
 
-	for (const user of celebrants) {
-		try {
+		for (const user of celebrants) {
 			await sendEmail(
 				"🎂 Happy Birthday!",
 				`<h2>Happy Birthday, ${user.username}! 🎉</h2>
-			 <p>We wish you a wonderful year ahead filled with joy and success.</p>`,
+         <p>We wish you a wonderful year ahead filled with joy and success.</p>`,
 				user.email
 			);
-			console.log("Birthday email sent to", user.email);
-		} catch (err) {
-			console.error("Failed to send email to", user.email, err);
+			console.log("🎉 Birthday email sent to", user.email);
 		}
+	} catch (err) {
+		console.error("❌ Cron job failed:", err);
 	}
 });
 
+// ---------------- SERVER ----------------
 app.listen(PORT, () => {
-	console.log(`Birthday Reminder running at http://localhost:${PORT}`);
+	console.log(`🚀 Birthday Reminder running at http://localhost:${PORT}`);
 });
