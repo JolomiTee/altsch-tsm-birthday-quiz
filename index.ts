@@ -60,32 +60,6 @@ app.post("/add", async (req: Request, res: Response) => {
 		}
 	}
 });
-
-cron.schedule("0 7 * * *", async () => {
-	const today = new Date().toISOString().slice(5, 10); // "MM-DD"
-
-	const users = await User.find({});
-	const celebrants = users.filter((u) => u.dob.slice(5) === today);
-
-	for (const user of celebrants) {
-		try {
-			await sendEmail(
-				"🎂 Happy Birthday!",
-				`<h2>Happy Birthday, ${user.username}! 🎉</h2>
-			 <p>We wish you a wonderful year ahead filled with joy and success.</p>`,
-				user.email
-			);
-			console.log("Birthday email sent to", user.email);
-		} catch (err) {
-			console.error("Failed to send email to", user.email, err);
-		}
-	}
-});
-
-app.listen(PORT, () => {
-	console.log(`Birthday Reminder running at http://localhost:${PORT}`);
-});
-
 async function sendEmail(
 	subject: string,
 	body: string,
@@ -126,3 +100,28 @@ async function sendEmail(
 		}
 	}
 }
+
+cron.schedule("0 7 * * *", async () => {
+	const today = new Date().toISOString().slice(5, 10); // "MM-DD"
+
+	const users = await User.find({});
+	const celebrants = users.filter((u) => u.dob.slice(5) === today);
+
+	for (const user of celebrants) {
+		try {
+			await sendEmail(
+				"🎂 Happy Birthday!",
+				`<h2>Happy Birthday, ${user.username}! 🎉</h2>
+			 <p>We wish you a wonderful year ahead filled with joy and success.</p>`,
+				user.email
+			);
+			console.log("Birthday email sent to", user.email);
+		} catch (err) {
+			console.error("Failed to send email to", user.email, err);
+		}
+	}
+});
+
+app.listen(PORT, () => {
+	console.log(`Birthday Reminder running at http://localhost:${PORT}`);
+});
