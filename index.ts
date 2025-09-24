@@ -5,7 +5,6 @@ import mongoose, { Schema, Document } from "mongoose";
 import nodemailer from "nodemailer";
 import cron from "node-cron";
 import dotenv from "dotenv";
-import createHttpError from "http-errors";
 import { Resend } from "resend";
 
 dotenv.config();
@@ -103,7 +102,6 @@ async function sendEmail(
 		});
 		if (error) {
 			console.error("Resend error:", error);
-			throw createHttpError(500, error || "Failed to send email");
 		}
 		console.log({ data });
 	} else {
@@ -125,7 +123,6 @@ async function sendEmail(
 			console.log("Nodemailer info:", info);
 		} catch (error) {
 			console.error("Nodemailer error:", error);
-			throw createHttpError(500, "Failed to send email via Gmail SMTP");
 		}
 	}
 }

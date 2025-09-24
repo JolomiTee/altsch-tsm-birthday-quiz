@@ -8,7 +8,6 @@
         "dotenv": "^17.2.2",
         "ejs": "^3.1.10",
         "express": "^5.1.0",
-        "http-error": "^0.0.6",
         "mongoose": "^8.18.1",
         "node-cron": "^4.2.1",
         "nodemailer": "^7.0.6",
@@ -344,8 +343,6 @@
     "has-symbols": ["has-symbols@1.1.0", "", {}, "sha512-1cDNdwJ2Jaohmb3sg4OmKaMBwuC48sYni5HUw2DvsC8LjGTLK9h+eb1X6RyuOHe4hT0ULCW68iomhjUoKUqlPQ=="],
 
     "hasown": ["hasown@2.0.2", "", { "dependencies": { "function-bind": "^1.1.2" } }, "sha512-0hJU9SCPvmMzIBdZFqNPXWa6dqh7WdH0cII9y+CyS8rG3nL48Bclra9HmKhVVUHyPWNH5Y7xDwAB7bfgSjkUMQ=="],
-
-    "http-error": ["http-error@0.0.6", "", {}, "sha512-1okadUMOfkA8o9mvatq5dopVrPdIsKw3K9JL2izosTqFJVa+ID8Siw4ichfW7AvXRVHVvpfQpEekPvrjZ3bqSg=="],
 
     "http-errors": ["http-errors@2.0.0", "", { "dependencies": { "depd": "2.0.0", "inherits": "2.0.4", "setprototypeof": "1.2.0", "statuses": "2.0.1", "toidentifier": "1.0.1" } }, "sha512-FtwrG/euBzaEjYeRqOgly7G0qviiXoJWnvEH2Z1plBdXgbyjv34pHTSb9zoeHMyDy33+DWy5Wt9Wo+TURtOYSQ=="],
 
