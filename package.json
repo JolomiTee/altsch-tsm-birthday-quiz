@@ -14,9 +14,9 @@
 		"ts-node-dev": "^2.0.0"
 	},
 	"scripts": {
-		"dev": "ts-node-dev --respawn --transpile-only index.ts",
-		"build": "tsc --incremental && cp -r views dist/",
-		"start": "node dist/index.js"
+		"build": "node --max-old-space-size=460 ./node_modules/.bin/tsc --incremental && cp -r views dist/",
+		"start": "node --max-old-space-size=460 dist/index.js",
+		"dev": "ts-node-dev --respawn --transpile-only src/index.ts"
 	},
 	"peerDependencies": {
 		"typescript": "^5.9.2"
