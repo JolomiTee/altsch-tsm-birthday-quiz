@@ -19,7 +19,7 @@ app.get("/", (req: Request, res: Response) => {
 	res.render("index");
 });
 
-app.use("/add", addRouter);
+app.use("/", addRouter);
 
 runCronJob();
 

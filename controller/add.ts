@@ -17,7 +17,7 @@ export const addController = async (req: Request<{}, {}, AddUserBody>, res: Resp
 	try {
 		const user = new User({ username, email, dob: new Date(dob) });
 		await user.save();
-		res.send("✅ User created!");
+		res.send("✅ User created!, we will remind you of your birthday");
 	} catch (err: any) {
 		if (err.code === 11000) {
 			res.send("⚠️ Email already exists!");
